@@ -9,11 +9,9 @@
     <style>
 
     :root {
-        /* body */
         --fg-normal: black;
         --bg-normal: white;
 
-        /* diff color */
         --fg-context: #606060;
         --bg-sector: #DDDDCC;
         --bg-add: #C0FFC0;
@@ -21,11 +19,9 @@
         --bg-mod: #D0D0FF;
         --bg-pad: #EEEEEE;
 
-        /* gutter */
         --fg-gutter: #999999;
         --bg-gutter: #F7F7F7;
 
-        /* misc */
         --bg-bar: #EEEEEE;
         --border: #BFBFBF;
     }
@@ -54,7 +50,6 @@
         padding: 0;
         margin: 0;
 
-        /* Default: prevent selection */
         -webkit-user-select: none;
         user-select: none;
     }
@@ -206,7 +201,6 @@
     <script>
 
     function diffRender(diff, node) {
-        // Common rendering engine STM states
         const LineState = {
             CONTEXT  : 0, // unmodified context block, should copy to both sides
             ADD      : 1, // + block, sideB only
@@ -216,7 +210,6 @@
             SEC_TITLE: 5, // section title, sideA only
         };
 
-        // insert file name to file selector
         function appendFileList(node, fileName) {
             let title = document.createElement("span");
             title.setAttribute("class", "nav_filename");
@@ -229,21 +222,19 @@
             node.appendChild(bar);
         }
 
-        // Add Navigation bar into DOM node.
         function buildFileNavigator(node, prefix) {
             let fileNames = node.getElementsByClassName("nav_filename");
             if (fileNames.length <= 1) {
                 return;
             }
 
-            // create file navigation bar
             let defaultItem = document.createElement("option");
             defaultItem.setAttribute("value", `#${prefix}TOP`);
             defaultItem.setAttribute("selected", "selected");
             defaultItem.appendChild(document.createTextNode("< Jump to ... >"));
 
             let title = document.createElement("span");
-            title.innerHTML = `<a id=${prefix}TOP></a><b>File List:&nbsp;</b>`;
+            title.innerHTML = `<a id=${prefix}TOP></a><b>&nbsp;</b>`;
 
             let list = document.createElement("select");
             list.setAttribute("onchange", "location.href = this.options[this.selectedIndex].value;");
@@ -259,13 +250,11 @@
                 let fileName = fileNames[i];
                 let fileNum = i + 1;
 
-                // Add file name into select list
                 let item = document.createElement("option");
                 item.setAttribute("value", `#${prefix}${fileNum}`);
                 item.appendChild(document.createTextNode(fileName.textContent));
                 list.insertBefore(item, list.firstChild);
 
-                // Add Prev/Next/Tops links before each title, set anchor on TOPS link
                 let smallbar = document.createElement("span");
                 smallbar.setAttribute("class", "nav_link_bar");
 
@@ -283,18 +272,15 @@
                 smallbar.appendChild(newNavLink(`#${prefix}${fileNum + 1}`, "&raquo;", null));
                 smallbar.appendChild(newNavLink(`#${prefix}TOP`,            "&uArr;",  prefix + fileNum));
 
-                // insert the small nav bar before the file name, and add a space between them
                 fileName.parentNode.insertBefore(smallbar, fileName);
                 fileName.insertBefore(document.createTextNode(" "), fileName.firstChild);
             }
 
-            // Insert the navigation bar before the first item, and place the default item to first
             list.removeChild(defaultItem);
             list.insertBefore(defaultItem, list.firstChild);
             node.insertBefore(bar, node.firstChild);
-        }   // buildFileNavigator
+        } 
 
-        // create a line number table cell
         function newLineNumCell(count) {
             let td = document.createElement("td");
             let pre = document.createElement("pre");
@@ -870,11 +856,9 @@
                 state = State.META;
             }
 
-            // for last file
             renderFile(fileName, node);
-        }   // unifiedDiffParser()
-
-        // normalize the line endings
+        }
+        
         diff = diff.replace(/\r\n?/g, "\n");
 
         node.innerHTML = "";
@@ -884,10 +868,9 @@
             contextDiffParser(diff, node);
         }
 
-        // Generate navigation bar and file list
         buildFileNavigator(node, "navFile");
-    }   // diffRender()
-
+    }
+        
     function loadDiff(node) {
         if (!window.FileReader) {
             alert("This feature is not supported in this browser. \n"
@@ -913,44 +896,38 @@
 </head>
 
 <body onload = "form_diff.reset()">
-    <h2>Side-by-Side Patch Viewer v0.7</h2>
     <form id = "form_diff">
         <div class = "toolbar">
-            Paste your diff snippet below then
-            <button
-                type = "button"
-                onclick = "diffRender(document.getElementById('diffText').value, document.getElementById('diffResult'))">
-                START
-            </button>
-            ; or load from a file:
+
             <input
                 id = "diff_file" type = "file" autocomplete = "off"
                 onchange = "loadDiff(document.getElementById('diffResult'))"/>
 
+
             <div style = "padding-top: 0.3em">
-                <textarea rows = "8" id = "diffText"></textarea>
+                <textarea rows="8" id="diffText"></textarea>
+                <div id="diffResult"></div>
+                
+                <script>
+                const ta = document.getElementById('diffText');
+                ta.addEventListener('keydown', e => {
+                  if (e.ctrlKey && e.key === 'Enter') {
+                    diffRender(ta.value, document.getElementById('diffResult'));
+                  }
+                });
+                </script>
             </div>
         </div>
     </form>
 
     <div id = "diffResult" class = "context"></div>
 
-    <div>
-        <ul>
-            <li>Use the "Save As..." to save the side-by-side view of current patch.</li>
-            <li>Check the project repository for updates: <a href=https://github.com/megatops/PatchViewer>https://github.com/megatops/PatchViewer</a></li>
-            <li>For any issues please contact Ding Zhaojie (<a href = "mailto:zhaojie_ding@msn.com">zhaojie_ding@msn.com</a>).</li>
-        </ul>
-    </div>
-
     <script>
 
     function getColSpan(cell) {
-        // Use 1 as default value
         return parseInt(cell.getAttribute("colspan") || 1, 10);
     }
 
-    // Get the column index considering colspan
     function getColumnIndex(cell) {
         let columnIndex = 0;
         for (const sibling of cell.parentNode.children) {
@@ -962,7 +939,6 @@
         return columnIndex;
     }
 
-    // Get the column index considering colspan
     function getCellByIndex(row, targetIndex) {
         let columnIndex = 0;
         for (const cell of row.children) {
@@ -975,20 +951,15 @@
         return null;
     }
 
-    // https://typeofnan.dev/how-to-bind-event-listeners-on-dynamically-created-elements-in-javascript/
-    // Use event bubbling to alert dynamically added elements,
-    // i.e. bind the event listener to the static parent element.
     document.addEventListener("DOMContentLoaded", () => {
         const diffResult = document.getElementById("diffResult");
         diffResult.addEventListener("mousedown", (e) => {
             const cell = e.target.closest("td");
 
-            // Ensure click is inside the table
             if (!cell || !diffResult.contains(cell)) {
                 return;
             }
 
-            // Make only the clicked column selectable
             diffResult.querySelectorAll("td").forEach(cell => {
                 cell.classList.remove("selectable");
             });
@@ -1018,12 +989,10 @@
             selectedCells = selectedCells.concat(selectableCells.filter(cell => range.intersectsNode(cell)));
         }
 
-        // only need to handle multi-line selection
         if (selectedCells.length <= 1) {
             return;
         }
 
-        // Override the clipboard content
         e.clipboardData.setData("text/plain", selectedCells.map(cell => {
             const preElement = cell.querySelector("pre");
             return preElement && preElement.textContent + "\n";
